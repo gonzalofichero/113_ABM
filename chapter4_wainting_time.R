@@ -5,19 +5,29 @@ library (lubridate) # for function date_decimal
 library(HMDHFDplus) # Read life tables from HMD
 
 
+##### HMD user and credentials, please ####
+user.n <- userInput()
+user.pass <- userInput()
+##### Which Year you want to analyze? ####
+refyear <- 2016
+##### Which Country you want to analyze? ####
+cty <- "LTU"
+
+
+
 #### Reproducing figure 4.6 ####
 country <- getHMDcountries()
 
 ##### Extracting data table from HMD for Lithuanian females ####
-ltu_f <- readHMDweb(CNTRY="LTU",item="fltper_1x1",
-                    username="gonzalo.fce@gmail.com",
-                    password="fermat31416",
+ltu_f <- readHMDweb(CNTRY= cty,item="fltper_1x1",
+                    username= user.n,
+                    password= user.pass,
                     fixup=TRUE)
 
 
-##### Age-specific death rates females 2016 in Lithuania, ages 0-110 #####
+##### Age-specific death rates females reference Year in Lithuania, ages 0-110 #####
 ltu_f %>% 
-  filter(Year == 2016) %>% 
+  filter(Year == refyear) %>% 
   select(mx) -> rates
 
 
@@ -55,8 +65,8 @@ ltu_f[ltu_f$Year==2016 & ltu_f$Age==0,]$ex
 ##### Histogram plot: figure 4.6 #####
 hist(x_D, breaks=0:110, xlab="Age", main=" ", las=1, cex.axis=0.8)
 box()
-title(main="Histogram of simulated lifespans generated from age-specific death rates\n
-Female population, Lithuania, 2016", cex.main=0.8)
+title(main= paste("Histogram of simulated lifespans generated from age-specific death rates\n
+Female population, Lithuania, ", refyear),cex.main=0.8)
 # Please take into account that the (x,y) position of the figure is dependent of your data
 # Manual change of this to look good...
 text(x=20,y=45, labels=paste("Mean age at death =", round(mean(x_D),2), sep=" "))
@@ -65,14 +75,10 @@ text(x=20,y=45, labels=paste("Mean age at death =", round(mean(x_D),2), sep=" ")
 
 #### Reproducing figure 4.7 ####
 
-##### Which Year you want to analyze? ####
-refyear <- 2016
-
-
 ##### Extracting data table from HMD for Lithuanian males ####
-ltu_m <- readHMDweb(CNTRY="LTU",item="mltper_1x1",
-                    username="gonzalo.fce@gmail.com",
-                    password="fermat31416",
+ltu_m <- readHMDweb(CNTRY= cty,item="mltper_1x1",
+                    username= user.n,
+                    password= user.pass,
                     fixup=TRUE)
 
 
@@ -105,9 +111,9 @@ ages <- ltu$Males$Age[ltu$Males$Year==refyear]
 
 ###### Birth Cohort for Lithuania Reference Year ###### 
 
-ltu_birth <- readHMDweb(CNTRY="LTU",item="Births",
-                    username="gonzalo.fce@gmail.com",
-                    password="fermat31416",
+ltu_birth <- readHMDweb(CNTRY=cty,item="Births",
+                    username= user.n,
+                    password= user.pass,
                     fixup=TRUE)
 
 ###### First generation: number of births ######
@@ -213,15 +219,15 @@ eD[3]  <- round (mean(data$x_D),2)
 hist(x_D,breaks=0:110,xlab="Age",main=" ",las=1,cex.axis=0.8)
 text(x=20,y=40,labels=paste("Mean age at death =",round(mean(x_D),3),sep=""))
 box()
-title(main="Histogram of simulated lifespans generated from age-specific death rates\n
-Female population, Lithuania, 2016",cex.main=0.8)
+title(main= paste("Histogram of simulated lifespans generated from age-specific death rates\n
+Female population, Lithuania, ", refyear),cex.main=0.8)
 
 
 ###### Ggplotting both sexes ###### 
 data %>% 
   ggplot () +
   geom_density(data=data,aes(round (x_D,0),fill=sex,color=sex),alpha=0.3) +
-  ggtitle ("Figure 4.7. Ages at death, Lithuania, 2016, Simulated and LT") +
+  ggtitle (paste("Figure 4.7. Ages at death, Lithuania, ", refyear, " Simulated and LT")) +
   xlab("Age") + ylab("Density") +
   theme(legend.position="bottom") +
   scale_x_continuous (breaks=seq(0,110,by=10)) -> p
@@ -230,8 +236,8 @@ data %>%
 ##### Adding density from life table for reference year #####
   
 # Deaths by Sex
-dm <- ltu$Male$dx[ltu$Male$Year==refyear]
-df <- ltu$Female$dx[ltu$Male$Year==refyear]
+dm <- ltu$Male$dx[ltu$Male$Year== refyear]
+df <- ltu$Female$dx[ltu$Male$Year== refyear]
 
 # Manual density
 density_m <- dm/sum(dm)
